@@ -1,28 +1,36 @@
 #!/bin/bash
 set -e
 
-WP_CONFIG="/var/www/html/wp-config.php"
+sleep 5
 
-# 1️⃣ Créer wp-config.php si absent
+WP_PATH="/var/www/html"
+WP_CONFIG="$WP_PATH/wp-config.php"
+
+# Vérification des variables d'environnement
+: "${WORDPRESS_DB_NAME:?WORDPRESS_DB_NAME is not set}"
+: "${WORDPRESS_DB_USER:?WORDPRESS_DB_USER is not set}"
+: "${WORDPRESS_DB_PASSWORD:?WORDPRESS_DB_PASSWORD is not set}"
+: "${WORDPRESS_DB_HOST:?WORDPRESS_DB_HOST is not set}"
+
+cd "$WP_PATH"
+
+# 1️⃣ Créer wp-config.php avec wp-cli
 if [ ! -f "$WP_CONFIG" ]; then
-    echo "🛠 Création de wp-config.php..."
-    cp /var/www/html/wp-config-sample.php "$WP_CONFIG"
-    sed -i "s/database_name_here/${WORDPRESS_DB_NAME}/" "$WP_CONFIG"
-    sed -i "s/username_here/${WORDPRESS_DB_USER}/" "$WP_CONFIG"
-    sed -i "s/password_here/${WORDPRESS_DB_PASSWORD}/" "$WP_CONFIG"
-    sed -i "s/localhost/${WORDPRESS_DB_HOST}/" "$WP_CONFIG"
+    echo "🛠 Création de wp-config.php avec wp-cli..."
 
-    # Générer les clés de sécurité
-    SALTS=$(curl -s https://api.wordpress.org/secret-key/1.1/salt/)
-    if [ -n "$SALTS" ]; then
-        echo "$SALTS" >> "$WP_CONFIG"
-    fi
+    wp config create \
+        --dbname="$WORDPRESS_DB_NAME" \
+        --dbuser="$WORDPRESS_DB_USER" \
+        --dbpass="$WORDPRESS_DB_PASSWORD" \
+        --dbhost="$WORDPRESS_DB_HOST" \
+        --skip-check \
+        --allow-root
 
     echo "✅ wp-config.php créé"
 fi
 
-# 2️⃣ Assurer les permissions
-chown -R www-data:www-data /var/www/html
+# 2️⃣ Permissions correctes
+chown -R www-data:www-data "$WP_PATH"
 
 # 3️⃣ Lancer PHP-FPM en avant-plan
 echo "🚀 Démarrage de PHP-FPM..."

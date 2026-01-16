@@ -5,22 +5,43 @@ services:
     build: requirements/mariadb
     env_file:
       - .env
+    expose:
+      - "3306"
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
       - inception
     restart: unless-stopped
+
   wordpress:
     container_name: wordpress
     build: requirements/wordpress
     env_file:
       - .env
+    expose:
+      - "9000"
     volumes:
       - wordpress_data:/var/www/html
     networks:
       - inception
     depends_on:
       - mariadb
+    restart: unless-stopped
+
+  nginx:
+    container_name: nginx
+    build: requirements/nginx
+    env_file:
+      - .env
+    ports:
+      - "8080:80"       # HTTP
+      - "8443:443"      # HTTPS si nécessaire
+    volumes:
+      - wordpress_data:/var/www/html  # monter WordPress en lecture seule
+    networks:
+      - inception
+    depends_on:
+      - wordpress
     restart: unless-stopped
 
 volumes:

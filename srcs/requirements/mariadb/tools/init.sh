@@ -7,11 +7,12 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
 fi
 
-# Lancer MariaDB temporaire
+# Lancer MariaDB en arrière-plan pour configurer les utilisateurs
 mysqld_safe --datadir=/var/lib/mysql &
 PID=$!
 
 # Attendre que MariaDB soit prêt
+echo "⏳ Attente de MariaDB..."
 until mysqladmin ping --silent; do
     sleep 1
 done
@@ -25,8 +26,10 @@ GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-# Arrêter temporairement MariaDB
-mysqladmin -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
+# Tuer le serveur temporaire
+kill $PID
+wait $PID 2>/dev/null || true
 
-# Lancer MariaDB en avant-plan
+# Lancer MariaDB en avant-plan (le conteneur reste actif)
+echo "🚀 Lancement de MariaDB en avant-plan..."
 exec mysqld_safe --datadir=/var/lib/mysql
