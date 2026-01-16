@@ -14,6 +14,13 @@ WP_CONFIG="$WP_PATH/wp-config.php"
 
 cd "$WP_PATH"
 
+# ⏳ Attendre que MariaDB soit prête
+echo "⏳ Waiting for MariaDB..."
+until mysql -h"$WORDPRESS_DB_HOST" -u"$WORDPRESS_DB_USER" -p"$WORDPRESS_DB_PASSWORD" "$WORDPRESS_DB_NAME" &> /dev/null; do
+  sleep 2
+done
+echo "✅ MariaDB ready"
+
 # 1️⃣ Créer wp-config.php avec wp-cli
 if [ ! -f "$WP_CONFIG" ]; then
     echo "🛠 Création de wp-config.php avec wp-cli..."
