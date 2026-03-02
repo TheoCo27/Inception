@@ -1,6 +1,31 @@
 #!/bin/bash
 set -euo pipefail
 
+load_secret() {
+  local var_name="$1"
+  local file_var_name="${var_name}_FILE"
+  local var_value="${!var_name-}"
+  local file_var_value="${!file_var_name-}"
+
+  if [ -n "${var_value}" ] && [ -n "${file_var_value}" ]; then
+    echo "Error: both ${var_name} and ${file_var_name} are set" >&2
+    exit 1
+  fi
+
+  if [ -n "${file_var_value}" ]; then
+    if [ ! -f "${file_var_value}" ]; then
+      echo "Error: secret file not found: ${file_var_value}" >&2
+      exit 1
+    fi
+    export "${var_name}=$(cat "${file_var_value}")"
+    unset "${file_var_name}"
+  fi
+}
+
+load_secret "WORDPRESS_DB_PASSWORD"
+load_secret "WP_ADMIN_PASSWORD"
+load_secret "WP_USER_PASSWORD"
+
 WP_PATH="/var/www/html"
 WP_CONFIG="${WP_PATH}/wp-config.php"
 WP_CLI="wp --path=${WP_PATH} --allow-root"

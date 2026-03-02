@@ -5,10 +5,16 @@ services:
     build: requirements/mariadb
     env_file:
       - .env
+    environment:
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
     expose:
       - "3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+    secrets:
+      - db_password
+      - db_root_password
     networks:
       - inception
     restart: unless-stopped
@@ -18,10 +24,18 @@ services:
     build: requirements/wordpress
     env_file:
       - .env
+    environment:
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+      WP_ADMIN_PASSWORD_FILE: /run/secrets/wp_admin_password
+      WP_USER_PASSWORD_FILE: /run/secrets/wp_user_password
     expose:
       - "9000"
     volumes:
       - wordpress_data:/var/www/html
+    secrets:
+      - db_password
+      - wp_admin_password
+      - wp_user_password
     networks:
       - inception
     depends_on:
@@ -47,6 +61,16 @@ services:
 volumes:
   mariadb_data:
   wordpress_data:
+
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
+  wp_user_password:
+    file: ../secrets/wp_user_password.txt
 
 networks:
   inception:
