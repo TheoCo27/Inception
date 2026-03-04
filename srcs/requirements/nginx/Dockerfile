@@ -13,8 +13,8 @@ RUN openssl req -x509 -nodes -days 365 \
     -newkey rsa:2048 \
     -keyout /etc/nginx/ssl/inception.key \
     -out /etc/nginx/ssl/inception.crt \
-    -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=Inception/CN=localhost" \
-    -addext "subjectAltName=DNS:localhost"
+    -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=Inception/CN=tcohen.42.fr" \
+    -addext "subjectAltName=DNS:tcohen.42.fr"
 
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 

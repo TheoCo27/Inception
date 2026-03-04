@@ -48,8 +48,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8080:80"       # HTTP
-      - "8443:443"      # HTTPS si nécessaire
+      - "443:443"
     volumes:
       - wordpress_data:/var/www/html  # monter WordPress en lecture seule
     networks:
