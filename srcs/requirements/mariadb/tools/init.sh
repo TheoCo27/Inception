@@ -32,10 +32,12 @@ load_secret "MYSQL_ROOT_PASSWORD"
 
 DATADIR="/var/lib/mysql"
 RUNDIR="/run/mysqld"
-INIT_SQL="/tmp/mariadb-init.sql"
 
 mkdir -p "${RUNDIR}"
 chown -R mysql:mysql "${RUNDIR}" "${DATADIR}"
+
+# Use a per-start SQL file to avoid permission conflicts on container restart.
+INIT_SQL="$(mktemp "${RUNDIR}/mariadb-init.XXXXXX.sql")"
 
 # Initialisation du datadir uniquement s'il est absent.
 if [ ! -d "${DATADIR}/mysql" ]; then
@@ -51,8 +53,8 @@ GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-chmod 600 "${INIT_SQL}"
-chown mysql:mysql "${INIT_SQL}"
+chmod 640 "${INIT_SQL}"
+chown root:mysql "${INIT_SQL}"
 
 echo "Starting MariaDB..."
 exec mysqld --user=mysql --datadir="${DATADIR}" --init-file="${INIT_SQL}"

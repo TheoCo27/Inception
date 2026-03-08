@@ -18,6 +18,12 @@ services:
       - db_root_password
     networks:
       - inception
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$(cat $$MYSQL_PASSWORD_FILE)\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
     restart: unless-stopped
 
   wordpress:
@@ -40,8 +46,15 @@ services:
       - wp_user_password
     networks:
       - inception
+    healthcheck:
+      test: ["CMD-SHELL", "wp --path=/var/www/html --allow-root core is-installed >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     restart: unless-stopped
 
   nginx:
@@ -56,8 +69,15 @@ services:
       - wordpress_data:/var/www/html  # monter WordPress en lecture seule
     networks:
       - inception
+    healthcheck:
+      test: ["CMD-SHELL", "curl -kfsS https://localhost/ >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
     depends_on:
-      - wordpress
+      wordpress:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

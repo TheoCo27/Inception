@@ -2,10 +2,15 @@ NAME = inception
 
 COMPOSE = docker-compose
 COMPOSE_FILE = srcs/docker-compose.yml
+DATA_ROOT ?= $(HOME)/data
+VOLUME_DIRS = $(DATA_ROOT)/mariadb $(DATA_ROOT)/wordpress
 
 all: up
 
-up:
+prepare-volumes:
+	mkdir -p $(VOLUME_DIRS)
+
+up: prepare-volumes
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d --build
 
 down:
@@ -34,4 +39,4 @@ fclean: down
 
 re: fclean up
 
-.PHONY: all up down start stop restart logs ps clean fclean re
+.PHONY: all prepare-volumes up down start stop restart logs ps clean fclean re
