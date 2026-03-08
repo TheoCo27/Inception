@@ -78,6 +78,9 @@ make up
 This command builds images and starts the full stack (`mariadb`, `wordpress`, `nginx`) using:
 
 - `srcs/docker-compose.yml`
+- It also creates bind-mount directories automatically:
+  - `${HOME}/data/mariadb`
+  - `${HOME}/data/wordpress`
 
 Stop the stack:
 

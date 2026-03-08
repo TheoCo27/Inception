@@ -25,6 +25,10 @@ Start everything:
 make up
 ```
 
+`make up` also creates local data directories used by bind mounts:
+- `${HOME}/data/mariadb`
+- `${HOME}/data/wordpress`
+
 Stop and remove containers/network (keep volumes):
 
 ```bash
