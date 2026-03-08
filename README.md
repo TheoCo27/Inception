@@ -33,7 +33,7 @@ This project uses Docker Compose to orchestrate multiple services, each with a s
 
 ### Main design choices
 - Split services by role (database / app / web server) for clarity and isolation.
-- Use named volumes for stateful data (`mariadb_data`, `wordpress_data`).
+- Use named volumes for stateful data (`mariadb_data`, `wordpress_data`) bound to `/home/<login>/data/...`.
 - Use Docker secrets for sensitive values instead of plain-text passwords in `.env`.
 - Keep only HTTPS publicly exposed.
 
@@ -55,9 +55,9 @@ This project uses Docker Compose to orchestrate multiple services, each with a s
 - **Choice here**: Docker bridge network, with controlled exposure of HTTPS only.
 
 ### Docker Volumes vs Bind Mounts
-- **Volumes**: Docker-managed storage, stable lifecycle, portable across host path changes.
-- **Bind mounts**: direct host path mapping, useful for live dev edits but tighter host coupling.
-- **Choice here**: named volumes for reliable persistence of DB and WordPress data.
+- **Volumes**: Docker-managed storage with stable lifecycle and easier service wiring.
+- **Bind mounts**: direct host path mapping, useful when a host path is required by the subject.
+- **Choice here**: named volumes using `driver_opts` bind to `/home/<login>/data/mariadb` and `/home/<login>/data/wordpress`.
 
 ## Instructions
 

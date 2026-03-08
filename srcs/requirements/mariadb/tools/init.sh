@@ -31,23 +31,19 @@ load_secret "MYSQL_ROOT_PASSWORD"
 : "${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is not set}"
 
 DATADIR="/var/lib/mysql"
-SOCKET="/run/mysqld/mysqld.sock"
+RUNDIR="/run/mysqld"
+INIT_SQL="/tmp/mariadb-init.sql"
 
-# Initialisation uniquement si le volume est vide.
+mkdir -p "${RUNDIR}"
+chown -R mysql:mysql "${RUNDIR}" "${DATADIR}"
+
+# Initialisation du datadir uniquement s'il est absent.
 if [ ! -d "${DATADIR}/mysql" ]; then
     echo "Initializing MariaDB data directory..."
     mysqld --initialize-insecure --user=mysql --datadir="${DATADIR}"
+fi
 
-    echo "Starting temporary MariaDB for first-time setup..."
-    mysqld_safe --datadir="${DATADIR}" --skip-networking &
-    PID=$!
-
-    echo "Waiting for temporary MariaDB..."
-    until mysqladmin --protocol=socket --socket="${SOCKET}" ping --silent > /dev/null 2>&1; do
-        sleep 1
-    done
-
-    mysql --protocol=socket --socket="${SOCKET}" -u root <<EOF
+cat > "${INIT_SQL}" <<EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
@@ -55,10 +51,8 @@ GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    echo "Stopping temporary MariaDB..."
-    kill "${PID}"
-    wait "${PID}" 2>/dev/null || true
-fi
+chmod 600 "${INIT_SQL}"
+chown mysql:mysql "${INIT_SQL}"
 
 echo "Starting MariaDB..."
-exec mysqld_safe --datadir="${DATADIR}"
+exec mysqld --user=mysql --datadir="${DATADIR}" --init-file="${INIT_SQL}"
