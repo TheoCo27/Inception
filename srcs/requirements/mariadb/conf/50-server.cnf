@@ -1,11 +1,21 @@
+# Bloc principal de configuration du daemon MariaDB.
 [mysqld]
+# Repertoire de stockage des donnees (monte sur volume persistant).
 datadir = /var/lib/mysql
+# Socket UNIX locale pour clients internes au conteneur.
 socket  = /run/mysqld/mysqld.sock
+# Ecoute sur toutes les interfaces pour accepter les connexions du reseau Docker.
 bind_address= 0.0.0.0
+# Port MySQL standard.
 port = 3306
+# Utilisateur systeme non-root pour securite.
 user = mysql
+# Encodage UTF-8 complet (emojis, caracteres multi-octets, etc.).
 character-set-server = utf8mb4
+# Collation par defaut pour comparaisons/tri.
 collation-server = utf8mb4_general_ci
 
+# Desactive le cache DNS des hotes (plus simple en environnement conteneur).
 skip-host-cache
+# Evite les resolutions DNS inverses a chaque connexion (performances + robustesse).
 skip-name-resolve

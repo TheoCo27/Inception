@@ -1,4 +1,3 @@
-
 services:
   mariadb:
     container_name: mariadb
@@ -66,7 +65,7 @@ services:
     ports:
       - "443:443"
     volumes:
-      - wordpress_data:/var/www/html  # monter WordPress en lecture seule
+      - wordpress_data:/var/www/html
     networks:
       - inception
     healthcheck:
@@ -83,16 +82,8 @@ services:
 volumes:
   mariadb_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${HOME}/data/mariadb
   wordpress_data:
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${HOME}/data/wordpress
 
 secrets:
   db_password:
