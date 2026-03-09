@@ -52,7 +52,7 @@ re: fclean up
 
 docker-data-root:
 	@echo "Run this on your Linux VM:"
-	@echo "  sudo ./scripts/configure_docker_data_root.sh /home/$${USER}/data/docker"
+	@echo "  sudo ./srcs/scripts/configure_docker_data_root.sh /home/$${USER}/data/docker"
 
 # Declare les cibles non-fichiers pour eviter les conflits de noms.
 .PHONY: all up down start stop restart logs ps clean fclean re docker-data-root
